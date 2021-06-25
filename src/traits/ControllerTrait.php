@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace pozitronik\traits;
+namespace pozitronik\traits\traits;
 
 use pozitronik\helpers\ArrayHelper;
 use pozitronik\helpers\ControllerHelper;

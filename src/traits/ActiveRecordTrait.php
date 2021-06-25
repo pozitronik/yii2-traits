@@ -1,16 +1,15 @@
 <?php
 declare(strict_types = 1);
 
-namespace pozitronik\traits;
+namespace pozitronik\traits\traits;
 
 use pozitronik\helpers\ArrayHelper;
+use pozitronik\traits\models\ActiveQuery;
 use RuntimeException;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
-use yii\db\ActiveQueryInterface;
 use yii\db\ActiveRecord;
 use Throwable;
-use yii\db\Connection;
 use yii\db\Exception as DbException;
 use yii\db\Transaction;
 use yii\helpers\VarDumper;
@@ -20,6 +19,13 @@ use yii\helpers\VarDumper;
  * Расширения модели ActiveRecord
  */
 trait ActiveRecordTrait {
+
+	/**
+	 * @return ActiveQuery
+	 */
+	public static function find():ActiveQuery {
+		return new ActiveQuery(static::class);
+	}
 
 	/**
 	 * Обёртка для быстрого поиска моделей с опциональным выбросом логируемого исключения
@@ -260,34 +266,5 @@ trait ActiveRecordTrait {
 		if ($transactional) $transaction->commit();
 		return $dc;
 	}
-
-	/**
-	 * @param mixed $condition
-	 * @return static|null
-	 * @see ActiveRecord::findOne()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public static function findOne($condition);
-
-	/**
-	 * @return string[]
-	 * @see ActiveRecord::primaryKey()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public static function primaryKey();
-
-	/**
-	 * @return ActiveQueryInterface
-	 * @see ActiveRecord::find()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public static function find();
-
-	/**
-	 * @return Connection
-	 * @see ActiveRecord::getDb()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public static function getDb();
 
 }

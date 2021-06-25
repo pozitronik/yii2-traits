@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace pozitronik\traits;
+namespace pozitronik\traits\traits;
 
 use pozitronik\helpers\DateHelper;
 use yii\db\ActiveQuery;
@@ -10,9 +10,6 @@ use pozitronik\helpers\ArrayHelper;
 use Throwable;
 use yii\db\ActiveQueryTrait as YiiActiveQueryTrait;
 use yii\db\ActiveRecord;
-use yii\db\Command;
-use yii\db\Connection;
-use yii\db\ExpressionInterface;
 
 /**
  * Обёртка над ActiveQuery с полезными и общеупотребительными функциями
@@ -89,76 +86,5 @@ trait ActiveQueryTrait {
 			return (int)$countQuery->count();
 		}, $duration);
 	}
-
-	/**
-	 * @param string $name
-	 * @param bool $checkVars
-	 * @param bool $checkBehaviors
-	 * @return bool
-	 * @see Model::hasProperty()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 * @noinspection PhpMissingParamTypeInspection
-	 */
-	abstract public function hasProperty($name, $checkVars = true, $checkBehaviors = true);
-
-	/**
-	 * @param string|array $condition
-	 * @param array $params
-	 * @return self
-	 * @see ActiveQuery::andOnCondition()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 * @noinspection PhpMissingParamTypeInspection
-	 */
-	abstract public function andOnCondition($condition, $params = []);
-
-	/**
-	 * @param bool $value
-	 * @return self
-	 * @see ActiveQuery::distinct()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 * @noinspection PhpMissingParamTypeInspection
-	 */
-	abstract public function distinct($value = true);
-
-	/**
-	 * @param Connection|null $db
-	 * @return Command
-	 * @see ActiveQuery::createCommand()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 * @noinspection PhpMissingParamTypeInspection
-	 */
-	abstract public function createCommand($db = null);
-
-	/**
-	 * @param string $q
-	 * @param Connection|null $db
-	 * @return int|string
-	 * @see ActiveQuery::count()
-	 * @noinspection PhpMissingParamTypeInspection
-	 */
-	abstract public function count($q = '*', $db = null);
-
-	/**
-	 * @param int|ExpressionInterface|null $limit
-	 * @return self
-	 * @see ActiveQuery::limit()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public function limit($limit);
-
-	/**
-	 * @param int|ExpressionInterface|null $offset
-	 * @return self
-	 * @see ActiveQuery::offset()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public function offset($offset);
-
-	/**
-	 * @param array $array
-	 * @return mixed
-	 * @see ActiveQuery::andFilterWhere()
-	 */
-	abstract public function andFilterWhere(array $array);
 
 }
