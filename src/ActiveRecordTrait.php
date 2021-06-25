@@ -3,13 +3,14 @@ declare(strict_types = 1);
 
 namespace pozitronik\traits;
 
-use pozitronik\core\models\LCQuery;
 use pozitronik\helpers\ArrayHelper;
 use RuntimeException;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
+use yii\db\ActiveQueryInterface;
 use yii\db\ActiveRecord;
 use Throwable;
+use yii\db\Connection;
 use yii\db\Exception as DbException;
 use yii\db\Transaction;
 use yii\helpers\VarDumper;
@@ -25,7 +26,7 @@ trait ActiveRecordTrait {
 	 * Упрощает проверку поиска моделей
 	 * @param mixed $id Поисковое условие (предпочтительно primaryKey, но не ограничиваемся им)
 	 * @param null|Throwable $throw - Если передано исключение, оно выбросится в случае ненахождения модели
-	 * @return null|self
+	 * @return null|ActiveRecord|self
 	 * @throws Throwable
 	 * @example Users::findModel($id, new NotFoundException('Пользователь не найден'))
 	 *
@@ -155,7 +156,7 @@ trait ActiveRecordTrait {
 	 */
 	public function identifyChangedAttributes():array {
 		$changedAttributes = [];
-		/** @noinspection ForeachSourceInspection */
+		/** @var ActiveRecord $this */
 		foreach ($this->attributes as $name => $value) {
 			/** @noinspection TypeUnsafeComparisonInspection */
 			if (ArrayHelper::getValue($this, "oldAttributes.$name") != $value) $changedAttributes[$name] = $value;//Нельзя использовать строгое сравнение из-за преобразований БД
@@ -170,6 +171,7 @@ trait ActiveRecordTrait {
 	 * @param mixed $value
 	 */
 	public function setAndSaveAttribute(string $name, $value):void {
+		/** @var ActiveRecord $this */
 		$this->setAttribute($name, $value);
 		$this->save();
 	}
@@ -180,6 +182,7 @@ trait ActiveRecordTrait {
 	 * @param null|array $values
 	 */
 	public function setAndSaveAttributes(?array $values):void {
+		/** @var ActiveRecord $this */
 		$this->setAttributes($values, false);
 		$this->save();
 	}
@@ -188,7 +191,9 @@ trait ActiveRecordTrait {
 	 * Универсальная функция удаления любой модели
 	 */
 	public function safeDelete():void {
+		/** @var ActiveRecord $this */
 		if ($this->hasAttribute('deleted')) {
+			/** @noinspection PhpUndefinedFieldInspection */
 			$this->setAndSaveAttribute('deleted', !$this->deleted);
 			$this->afterDelete();
 		} else {
@@ -202,6 +207,7 @@ trait ActiveRecordTrait {
 	 * @return bool
 	 */
 	public function loadArray(?array $arrayData):bool {
+		/** @var ActiveRecord $this */
 		return $this->load($arrayData, '');
 	}
 
@@ -210,6 +216,7 @@ trait ActiveRecordTrait {
 	 * @return string
 	 */
 	public function asJSON(string $property):string {
+		/** @var ActiveRecord $this */
 		if (!$this->hasAttribute($property)) throw new RuntimeException("Field $property not exists in the table ".$this::tableName());
 		return json_encode($this->$property, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
 	}
@@ -228,90 +235,21 @@ trait ActiveRecordTrait {
 	}
 
 	/**
-	 * Метод создания модели, выполняющий дополнительную обработку:
-	 *    Обеспечивает последовательное создание модели и заполнение данных по связям (т.е. тех данных, которые не могут быть заполнены до фактического создания модели).
-	 *    Последовательность заключена в транзакцию - сбой на любом шаге ведёт к отмене всей операции.
-	 *
-	 * Значения по умолчанию больше не учитываются методом, предполагается, что они заданы в rules().
-	 * Если требуется выполнить какую-то логику в процессе создания - используем стандартные методы, вроде beforeValidate/beforeSave (по ситуации).
-	 *
-	 * @param array|null $paramsArray - массив параметров БЕЗ учёта имени модели в форме (я забыл, почему сделал так, но, видимо, причина была)
-	 * @param array $mappedParams - массив с параметрами для реляционных атрибутов в формате 'имя атрибута' => массив значений
-	 * @return bool - результат операции
-	 * @throws Throwable
-	 * @throws DbException
-	 */
-	public function createModel(?array $paramsArray, array $mappedParams = []):bool {
-		$saved = false;
-		if ($this->loadArray($paramsArray)) {
-			/** @var Transaction $transaction */
-			$transaction = static::getDb()->beginTransaction();
-			if (true === $saved = $this->save()) {
-				$this->refresh();//переподгрузим атрибуты
-				/*Возьмём разницу атрибутов и массива параметров - в нем будут новые атрибуты, которые теперь можно заполнить*/
-				$relatedParameters = [];
-				foreach ($paramsArray as $item => $value) {//вычисляем связанные параметры, которые не могли быть сохранены до сохранения основной модели
-					/** @noinspection TypeUnsafeComparisonInspection */
-					if ($value != ArrayHelper::getValue($this->attributes, $item)) $relatedParameters[$item] = $value;//строгое сравнение тут не нужно
-				}
-				$mappedParams = array_merge($mappedParams, $relatedParameters);
-
-				if ([] !== $mappedParams) {//если было, что сохранять - сохраним
-					foreach ($mappedParams as $paramName => $paramArray) {//дополнительные атрибуты в формате 'имя атрибута' => $paramsArray
-						if ($this->hasProperty($paramName) && $this->canSetProperty($paramName) && !empty($paramArray)) {
-							$this->$paramName = $paramArray;
-						}
-					}
-					$saved = $this->save();
-					$this->refresh();
-				}
-			}
-			if ($saved) {
-				$transaction->commit();
-			} else {
-				$transaction->rollBack();
-			}
-		}
-		return $saved;
-	}
-
-	/**
-	 * Метод обновления модели, выполняющий дополнительную обработку
-	 * @param array|null $paramsArray - массив параметров БЕЗ учёта имени модели в форме (я забыл, почему сделал так, но, видимо, причина была)
-	 * @param array $mappedParams @see createModel $mappedParams
-	 * @return bool
-	 *
-	 * Раньше здесь была логика оповещений, после её удаления метод свёлся к текущему состоянию
-	 * @throws DbException
-	 * @throws Exception
-	 * @throws Throwable
-	 */
-	public function updateModel(?array $paramsArray, array $mappedParams = []):bool {
-		return $this->createModel($paramsArray, $mappedParams);
-	}
-
-	/**
-	 * @return LCQuery
-	 */
-	public static function find():LCQuery {
-		return new LCQuery(static::class);
-	}
-
-	/**
 	 * Отличия от базового deleteAll(): работаем в цикле для корректного логирования (через декомпозицию)
 	 * @param null|mixed $condition
 	 * @param bool $transactional
 	 * @return int|null
 	 * @throws DbException
+	 * @throws Throwable
 	 */
-	public static function deleteAllEx($condition = null, $transactional = true):?int {
+	public static function deleteAllEx($condition = null, bool $transactional = true):?int {
 		$self_class_name = static::class;
 		$self_class = new $self_class_name();
+		/** @var ActiveRecord $self_class */
 		$deletedModels = $self_class::findAll($condition);
 		$dc = 0;
 		/** @var Transaction $transaction */
-		if ($transactional) $transaction = static::getDb()->beginTransaction();
-		/** @var static[] $deletedModels */
+		if ($transactional && null === $transaction = static::getDb()->beginTransaction()) throw new DbException('Starting transaction error');
 		foreach ($deletedModels as $deletedModel) {
 			if (false === $deletedCount = $deletedModel->delete()) {
 				$transaction->rollBack();
@@ -322,5 +260,34 @@ trait ActiveRecordTrait {
 		if ($transactional) $transaction->commit();
 		return $dc;
 	}
+
+	/**
+	 * @param mixed $condition
+	 * @return static|null
+	 * @see ActiveRecord::findOne()
+	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 */
+	abstract public static function findOne($condition);
+
+	/**
+	 * @return string[]
+	 * @see ActiveRecord::primaryKey()
+	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 */
+	abstract public static function primaryKey();
+
+	/**
+	 * @return ActiveQueryInterface
+	 * @see ActiveRecord::find()
+	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 */
+	abstract public static function find();
+
+	/**
+	 * @return Connection
+	 * @see ActiveRecord::getDb()
+	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 */
+	abstract public static function getDb();
 
 }
