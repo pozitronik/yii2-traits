@@ -23,7 +23,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"pozitronik\\core\\": "src"
+			"pozitronik\\traits\\": "src"
 		}
 	},
 	"config": {
