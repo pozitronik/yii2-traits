@@ -97,6 +97,7 @@ trait ActiveQueryTrait {
 	 * @return bool
 	 * @see Model::hasProperty()
 	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 * @noinspection PhpMissingParamTypeInspection
 	 */
 	abstract public function hasProperty($name, $checkVars = true, $checkBehaviors = true);
 
@@ -106,6 +107,7 @@ trait ActiveQueryTrait {
 	 * @return self
 	 * @see ActiveQuery::andOnCondition()
 	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 * @noinspection PhpMissingParamTypeInspection
 	 */
 	abstract public function andOnCondition($condition, $params = []);
 
@@ -114,6 +116,7 @@ trait ActiveQueryTrait {
 	 * @return self
 	 * @see ActiveQuery::distinct()
 	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 * @noinspection PhpMissingParamTypeInspection
 	 */
 	abstract public function distinct($value = true);
 
@@ -122,6 +125,7 @@ trait ActiveQueryTrait {
 	 * @return Command
 	 * @see ActiveQuery::createCommand()
 	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 * @noinspection PhpMissingParamTypeInspection
 	 */
 	abstract public function createCommand($db = null);
 
@@ -130,6 +134,7 @@ trait ActiveQueryTrait {
 	 * @param Connection|null $db
 	 * @return int|string
 	 * @see ActiveQuery::count()
+	 * @noinspection PhpMissingParamTypeInspection
 	 */
 	abstract public function count($q = '*', $db = null);
 
