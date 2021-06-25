@@ -3,11 +3,15 @@ declare(strict_types = 1);
 
 namespace pozitronik\traits;
 
+use pozitronik\helpers\ArrayHelper;
 use pozitronik\helpers\ModuleHelper;
+use pozitronik\helpers\Utils;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Module;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /**
  * Trait ModuleExtended
@@ -58,11 +62,54 @@ trait ModuleTrait {
 	 * @throws Throwable
 	 */
 	public static function breadcrumbItem(string $label, $uroute = ''):array {
-		if ((null === $module = Module::getInstance()) && null === $module = ModuleHelper::GetModuleByClassName(static::class)) {
+		if ((null === $module = static::getInstance()) && null === $module = ModuleHelper::GetModuleByClassName(static::class)) {
 			$module = Yii::$app->controller->module;
 		}
 		/** @var self $module */
 		return ['label' => $label, 'url' => $module::to($uroute)];
 	}
+
+	/**
+	 * Возвращает путь внутри модуля. Путь всегда будет абсолютный, от корня
+	 * @param string|array $route -- контроллер и экшен + параметры
+	 * @return string
+	 * @throws InvalidConfigException
+	 * @throws Throwable
+	 * @example SalaryModule::to(['salary/index','id' => 10]) => /salary/salary/index?id=10
+	 * @example UsersModule::to('users/index') => /users/users/index
+	 */
+	public static function to($route = ''):string {
+		if ((null === $module = static::getInstance()) && null === $module = ModuleHelper::GetModuleByClassName(static::class)) {
+			throw new InvalidConfigException("Модуль ".static::class." не подключён");
+		}
+		if (is_array($route)) {/* ['controller{/action}', 'actionParam' => $paramValue */
+			ArrayHelper::setValue($route, 0, Utils::setAbsoluteUrl($module->id.Utils::setAbsoluteUrl(ArrayHelper::getValue($route, 0))));
+		} else {/* 'controller{/action}' */
+			if ('' === $route) $route = $module->defaultRoute;
+			$route = Utils::setAbsoluteUrl($module->id.Utils::setAbsoluteUrl($route));
+		}
+		return Url::to($route);
+	}
+
+	/**
+	 * Генерация html-ссылки внутри модуля (аналог Html::a(), но с автоматическим учётом путей модуля).
+	 * @param string $text
+	 * @param array|string|null $url
+	 * @param array $options
+	 * @return string
+	 * @throws InvalidConfigException
+	 * @throws Throwable
+	 */
+	public static function a(string $text, $url = null, array $options = []):string {
+		$url = static::to($url);
+		return Html::a($text, $url, $options);
+	}
+
+	/**
+	 * @return null|static
+	 * @see Module::getInstance()
+	 * @noinspection ReturnTypeCanBeDeclaredInspection
+	 */
+	abstract public static function getInstance();
 
 }
