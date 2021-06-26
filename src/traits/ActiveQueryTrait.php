@@ -19,10 +19,10 @@ trait ActiveQueryTrait {
 	use YiiActiveQueryTrait;
 
 	/**
-	 * Глобальная замена findWorkOnly
-	 * Возвращает записи, не помеченные, как удалённые
+	 * Селектор для флага "deleted", если он присутствует в таблице
 	 * @param bool $deleted
 	 * @return $this
+	 * @example ActiveRecord::find()->active()->all()
 	 */
 	public function active(bool $deleted = false):self {
 		/** @var ActiveRecord $class */
