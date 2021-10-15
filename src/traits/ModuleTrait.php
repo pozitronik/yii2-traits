@@ -18,6 +18,8 @@ use yii\helpers\Url;
  *
  * @property-read string $namespace
  * @property-read string $alias
+ * @method static getInstance()
+ * @see Module::getInstance()
  */
 trait ModuleTrait {
 	protected $_namespace;
@@ -104,12 +106,5 @@ trait ModuleTrait {
 		$url = static::to($url);
 		return Html::a($text, $url, $options);
 	}
-
-	/**
-	 * @return null|static
-	 * @see Module::getInstance()
-	 * @noinspection ReturnTypeCanBeDeclaredInspection
-	 */
-	abstract public static function getInstance();
 
 }
