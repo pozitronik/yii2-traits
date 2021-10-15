@@ -107,4 +107,16 @@ trait ModuleTrait {
 		return Html::a($text, $url, $options);
 	}
 
+	/**
+	 * Получение параметра конфигурации модуля
+	 * @param string $parameterName
+	 * @param null|mixed $defaultValue
+	 * @return mixed
+	 * @throws InvalidConfigException
+	 * @throws Throwable
+	 */
+	public static function param(string $parameterName, $defaultValue = null) {
+		return ArrayHelper::getValue(ModuleHelper::params(static::class), $parameterName, $defaultValue);
+	}
+
 }
