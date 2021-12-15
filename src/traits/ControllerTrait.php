@@ -3,9 +3,7 @@ declare(strict_types = 1);
 
 namespace pozitronik\traits\traits;
 
-use pozitronik\helpers\ArrayHelper;
 use pozitronik\helpers\ControllerHelper;
-use pozitronik\helpers\ReflectionHelper;
 use pozitronik\helpers\Utils;
 use ReflectionException;
 use yii\base\UnknownClassException;
@@ -42,7 +40,7 @@ trait ControllerTrait {
 	 * @return string
 	 * @example SomeController::to('index', ['id' => 1]) => '/some/index?id=1'
 	 */
-	public static function to(string $action, array $params = [], $scheme = false):string {
+	public static function to(string $action, array $params = [], bool|string $scheme = false):string {
 		return Url::to(self::GetActionUrl($action, $params), $scheme);
 	}
 
@@ -54,12 +52,7 @@ trait ControllerTrait {
 	 * @throws UnknownClassException
 	 */
 	public static function GetControllerActions(bool $asRequestName = true):array {
-		$names = ArrayHelper::getColumn(ReflectionHelper::GetMethods(static::class), 'name');
-		$names = preg_filter('/^action([A-Z])(\w+?)/', '$1$2', $names);
-		if ($asRequestName) {
-			foreach ($names as &$name) $name = ControllerHelper::GetActionRequestName($name);
-		}
-		return $names;
+		return ControllerHelper::GetControllerActions(static::class, $asRequestName);
 	}
 
 }
