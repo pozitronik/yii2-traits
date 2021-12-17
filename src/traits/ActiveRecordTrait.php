@@ -10,6 +10,7 @@ use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
 use Throwable;
+use yii\db\ActiveRecordInterface;
 use yii\db\Exception as DbException;
 use yii\db\Transaction;
 use yii\helpers\VarDumper;
@@ -28,7 +29,24 @@ trait ActiveRecordTrait {
 	}
 
 	/**
-	 * Обёртка для быстрого поиска моделей с опциональным выбросом логируемого исключения
+	 * По (int)$pk|(string)$pk пытается вернуть соответствующую ActiveRecord-модель
+	 * @param null|string|ActiveRecordInterface $className
+	 * @param int|string|ActiveRecordInterface $model
+	 * @return ActiveRecordInterface|null
+	 */
+	public static function ensureModel(null|string|ActiveRecordInterface $className, int|string|ActiveRecordInterface $model):?ActiveRecordInterface {
+		if (is_string($model) && is_numeric($model)) {
+			$model = (int)$model;
+		}
+		if (is_int($model)) {
+			/** @var ActiveRecordInterface $className */
+			$model = $className::findOne($model);
+		}
+		return is_a($model, ActiveRecordInterface::class, false)?$model:null;
+	}
+
+	/**
+	 * Обёртка для быстрого поиска моделей с опциональным выбросом логируемого исключения.
 	 * Упрощает проверку поиска моделей
 	 * @param mixed $id Поисковое условие (предпочтительно primaryKey, но не ограничиваемся им)
 	 * @param null|Throwable $throw - Если передано исключение, оно выбросится в случае ненахождения модели
@@ -91,29 +109,44 @@ trait ActiveRecordTrait {
 	}
 
 	/**
+	 * Если модель с текущими атрибутами есть - вернуть её. Если нет - создать и вернуть.
+	 * @param array $attributes
+	 * @param bool $saveNew Сохранять ли вновь созданную модель
+	 * @return static
+	 */
+	public static function Upsert(array $attributes, bool $saveNew = true):static {
+		if (null === $model = static::find()->where($attributes)->one()) {
+			$model = new static();
+			$model->load($attributes, '');
+			if ($saveNew) $model->save();
+		}
+		return $model;
+	}
+
+	/**
 	 * Возвращает существующую запись в ActiveRecord-модели, найденную по условию, если же такой записи нет - возвращает новую модель
 	 * @param array|string $searchCondition
-	 * @return ActiveRecord|self
+	 * @return static
 	 */
-	public static function getInstance($searchCondition):self {
+	public static function getInstance($searchCondition):static {
 		$instance = static::find()->where($searchCondition)->one();
 		return $instance??new static();
 	}
 
 	/**
 	 * Первый параметр пока что специально принудительно указываю массивом, это позволяет не накосячить при задании параметров. Потом возможно будет убрать
-	 * !Функция была отрефакторена и после этого не тестировалась!
+	 * Функция была отрефакторена и после этого не тестировалась!
 	 * @param array $searchCondition
 	 * @param null|array $fields
 	 * @param bool $ignoreEmptyCondition Игнорировать пустое поисковое значение
 	 * @param bool $forceUpdate Если запись по условию найдена, пытаться обновить её
 	 * @param bool $throwOnError
-	 * @return ActiveRecord|self|null
+	 * @return null|static
 	 * @throws Exception
 	 * @throws InvalidConfigException
 	 */
-	public static function addInstance(array $searchCondition, ?array $fields = null, bool $ignoreEmptyCondition = true, bool $forceUpdate = false, bool $throwOnError = true):?self {
-		if ($ignoreEmptyCondition && (empty($searchCondition) || (is_array($searchCondition) && empty(reset($searchCondition))))) return null;
+	public static function addInstance(array $searchCondition, ?array $fields = null, bool $ignoreEmptyCondition = true, bool $forceUpdate = false, bool $throwOnError = true):?static {
+		if ($ignoreEmptyCondition && (empty($searchCondition) || (empty(reset($searchCondition))))) return null;
 
 		$instance = static::getInstance($searchCondition);
 		if ($instance->isNewRecord || $forceUpdate) {
@@ -162,7 +195,6 @@ trait ActiveRecordTrait {
 	 */
 	public function identifyChangedAttributes():array {
 		$changedAttributes = [];
-		/** @var ActiveRecord $this */
 		foreach ($this->attributes as $name => $value) {
 			/** @noinspection TypeUnsafeComparisonInspection */
 			if (ArrayHelper::getValue($this, "oldAttributes.$name") != $value) $changedAttributes[$name] = $value;//Нельзя использовать строгое сравнение из-за преобразований БД
@@ -171,24 +203,22 @@ trait ActiveRecordTrait {
 	}
 
 	/**
-	 * Работает аналогично saveAttribute, но сразу сохраняет данные
+	 * Работает аналогично saveAttribute, но сразу сохраняет данные.
 	 * Отличается от updateAttribute тем, что триггерит onAfterSave
 	 * @param string $name
 	 * @param mixed $value
 	 */
 	public function setAndSaveAttribute(string $name, $value):void {
-		/** @var ActiveRecord $this */
 		$this->setAttribute($name, $value);
 		$this->save();
 	}
 
 	/**
-	 * Работает аналогично saveAttributes, но сразу сохраняет данные
+	 * Работает аналогично saveAttributes, но сразу сохраняет данные.
 	 * Отличается от updateAttributes тем, что триггерит onAfterSave
 	 * @param null|array $values
 	 */
 	public function setAndSaveAttributes(?array $values):void {
-		/** @var ActiveRecord $this */
 		$this->setAttributes($values, false);
 		$this->save();
 	}
@@ -197,7 +227,6 @@ trait ActiveRecordTrait {
 	 * Универсальная функция удаления любой модели
 	 */
 	public function safeDelete():void {
-		/** @var ActiveRecord $this */
 		if ($this->hasAttribute('deleted')) {
 			/** @noinspection PhpUndefinedFieldInspection */
 			$this->setAndSaveAttribute('deleted', !$this->deleted);
@@ -213,7 +242,6 @@ trait ActiveRecordTrait {
 	 * @return bool
 	 */
 	public function loadArray(?array $arrayData):bool {
-		/** @var ActiveRecord $this */
 		return $this->load($arrayData, '');
 	}
 
@@ -222,7 +250,6 @@ trait ActiveRecordTrait {
 	 * @return string
 	 */
 	public function asJSON(string $property):string {
-		/** @var ActiveRecord $this */
 		if (!$this->hasAttribute($property)) throw new RuntimeException("Field $property not exists in the table ".$this::tableName());
 		return json_encode($this->$property, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
 	}
@@ -265,6 +292,44 @@ trait ActiveRecordTrait {
 		}
 		if ($transactional) $transaction->commit();
 		return $dc;
+	}
+
+	/**
+	 * @inheritDoc
+	 * @param ActiveRecordInterface|int|string $model the model to be linked with the current one.
+	 * @noinspection ParameterDefaultValueIsNotNullInspection - для совместимости с методом фреймворка
+	 */
+	public function link($name, $model, $extraColumns = []):void {
+		/* @noinspection PhpMultipleClassDeclarationsInspection parent всегда будет ссылаться на BaseActiveRecord, но у нас нет способа это пометить */
+		parent::link($name, self::ensureModel($this->$name, $model), $extraColumns);
+	}
+
+	/**
+	 * Разница изменений атрибутов после обновления модели
+	 * @param bool $strict Строгое сравнение
+	 * @return array
+	 * @throws Throwable
+	 */
+	public function identifyUpdatedAttributes(bool $strict = true):array {
+		$changedAttributes = [];
+		foreach ($this->attributes as $name => $value) {
+			/** @noinspection TypeUnsafeComparisonInspection */
+			$changed = $strict?(ArrayHelper::getValue($this, "oldAttributes.$name") !== $value):(ArrayHelper::getValue($this, "oldAttributes.$name") != $value);
+			if ($changed) $changedAttributes[$name] = $value;//Нельзя использовать строгое сравнение из-за преобразований БД
+		}
+		return $changedAttributes;
+	}
+
+	/**
+	 * Изменилось ли значение атрибута после обновления модели
+	 * @param string $attribute
+	 * @param bool $strict Строгое сравнение
+	 * @return bool
+	 * @throws Throwable
+	 */
+	public function isAttributeUpdated(string $attribute, bool $strict = true):bool {
+		/** @noinspection TypeUnsafeComparisonInspection */
+		return $strict?(ArrayHelper::getValue($this, "oldAttributes.$attribute") !== $this->$attribute):(ArrayHelper::getValue($this, "oldAttributes.$attribute") != $this->$attribute);
 	}
 
 }
