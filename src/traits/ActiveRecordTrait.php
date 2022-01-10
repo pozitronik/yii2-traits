@@ -56,7 +56,7 @@ trait ActiveRecordTrait {
 	 *
 	 * @example if (null !== $user = Users::findModel($id)) return $user
 	 */
-	public static function findModel($id, ?Throwable $throw = null):?static {
+	public static function findModel(mixed $id, ?Throwable $throw = null):?static {
 		if (null !== ($model = static::findOne($id))) return $model;
 		if (null !== $throw) {
 			throw $throw;
@@ -68,11 +68,11 @@ trait ActiveRecordTrait {
 	 * Ищет по указанному условию, возвращая указанный атрибут модели или $default, если модель не найдена
 	 * @param mixed $condition Поисковое условие
 	 * @param string|null $attribute Возвращаемый атрибут (если не задан, то вернётся первичный ключ)
-	 * @param null|mixed $default
+	 * @param mixed|null $default
 	 * @return mixed
 	 * @throws InvalidConfigException
 	 */
-	public static function findModelAttribute($condition, ?string $attribute = null, $default = null) {
+	public static function findModelAttribute(mixed $condition, ?string $attribute = null, mixed $default = null) {
 		if (null === $model = static::findOne($condition)) return $default;
 
 		if (null === $attribute) {
@@ -128,7 +128,7 @@ trait ActiveRecordTrait {
 	 * @param array|string $searchCondition
 	 * @return static
 	 */
-	public static function getInstance($searchCondition):static {
+	public static function getInstance(array|string $searchCondition):static {
 		$instance = static::find()->where($searchCondition)->one();
 		return $instance??new static();
 	}
@@ -208,7 +208,7 @@ trait ActiveRecordTrait {
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	public function setAndSaveAttribute(string $name, $value):void {
+	public function setAndSaveAttribute(string $name, mixed $value):void {
 		$this->setAttribute($name, $value);
 		$this->save();
 	}
@@ -269,13 +269,13 @@ trait ActiveRecordTrait {
 
 	/**
 	 * Отличия от базового deleteAll(): работаем в цикле для корректного логирования (через декомпозицию)
-	 * @param null|mixed $condition
+	 * @param mixed|null $condition
 	 * @param bool $transactional
 	 * @return int|null
 	 * @throws DbException
 	 * @throws Throwable
 	 */
-	public static function deleteAllEx($condition = null, bool $transactional = true):?int {
+	public static function deleteAllEx(mixed $condition = null, bool $transactional = true):?int {
 		$self_class_name = static::class;
 		$self_class = new $self_class_name();
 		/** @var ActiveRecord $self_class */

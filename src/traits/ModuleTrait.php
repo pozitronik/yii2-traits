@@ -58,12 +58,12 @@ trait ModuleTrait {
 	/**
 	 * Функция генерирует пункт меню навигации внутри модуля
 	 * @param string $label
-	 * @param string|array $uroute
+	 * @param array|string $uroute
 	 * @return array
 	 * @throws InvalidConfigException
 	 * @throws Throwable
 	 */
-	public static function breadcrumbItem(string $label, $uroute = ''):array {
+	public static function breadcrumbItem(string $label, array|string $uroute = ''):array {
 		if ((null === $module = static::getInstance()) && null === $module = ModuleHelper::GetModuleByClassName(static::class)) {
 			$module = Yii::$app->controller->module;
 		}
@@ -73,14 +73,14 @@ trait ModuleTrait {
 
 	/**
 	 * Возвращает путь внутри модуля. Путь всегда будет абсолютный, от корня
-	 * @param string|array $route -- контроллер и экшен + параметры
+	 * @param array|string $route -- контроллер и экшен + параметры
 	 * @return string
 	 * @throws InvalidConfigException
 	 * @throws Throwable
 	 * @example SalaryModule::to(['salary/index','id' => 10]) => /salary/salary/index?id=10
 	 * @example UsersModule::to('users/index') => /users/users/index
 	 */
-	public static function to($route = ''):string {
+	public static function to(array|string $route = ''):string {
 		if ((null === $module = static::getInstance()) && null === $module = ModuleHelper::GetModuleByClassName(static::class)) {
 			throw new InvalidConfigException("Модуль ".static::class." не подключён");
 		}
@@ -102,7 +102,7 @@ trait ModuleTrait {
 	 * @throws InvalidConfigException
 	 * @throws Throwable
 	 */
-	public static function a(string $text, $url = null, array $options = []):string {
+	public static function a(string $text, array|string $url = null, array $options = []):string {
 		$url = static::to($url);
 		return Html::a($text, $url, $options);
 	}
@@ -110,12 +110,12 @@ trait ModuleTrait {
 	/**
 	 * Получение параметра конфигурации модуля
 	 * @param string $parameterName
-	 * @param null|mixed $defaultValue
+	 * @param mixed|null $defaultValue
 	 * @return mixed
 	 * @throws InvalidConfigException
 	 * @throws Throwable
 	 */
-	public static function param(string $parameterName, $defaultValue = null) {
+	public static function param(string $parameterName, mixed $defaultValue = null) {
 		return ArrayHelper::getValue(ModuleHelper::params(static::class), $parameterName, $defaultValue);
 	}
 
