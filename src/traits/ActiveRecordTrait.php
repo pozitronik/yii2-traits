@@ -94,6 +94,16 @@ trait ActiveRecordTrait {
 	}
 
 	/**
+	 * Возвращает массив вида [название первичного ключа => значение]
+	 * @return array|null
+	 */
+	public function pkNameValue():?array {
+		return (null === $pk = static::pkName())
+			?null
+			:[$pk => $this->$pk];
+	}
+
+	/**
 	 * По итерируемому списку ключей вернёт список подходящих моделей
 	 * @param null|int[] $keys Итерируемый список ключей
 	 * @return self[]
