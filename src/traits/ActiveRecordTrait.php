@@ -310,7 +310,6 @@ trait ActiveRecordTrait {
 	 * @noinspection ParameterDefaultValueIsNotNullInspection - для совместимости с методом фреймворка
 	 */
 	public function link($name, $model, $extraColumns = []):void {
-		/* @noinspection PhpMultipleClassDeclarationsInspection parent всегда будет ссылаться на BaseActiveRecord, но у нас нет способа это пометить */
 		parent::link($name, self::ensureModel($this->$name, $model), $extraColumns);
 	}
 

@@ -18,7 +18,6 @@ trait ActiveQueryTrait {
 	 * @param bool $deleted
 	 * @return $this
 	 * @example ActiveRecord::find()->active()->all()
-	 * @noinspection PhpDocSignatureInspection Корректно: нет способа объяснить инспектору, что трейт привязан к ActiveQuery
 	 */
 	public function active(bool $deleted = false):self {
 		/** @var ActiveRecord $class */
