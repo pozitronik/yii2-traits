@@ -341,4 +341,21 @@ trait ActiveRecordTrait {
 		return $strict?(ArrayHelper::getValue($this, "oldAttributes.$attribute") !== $this->$attribute):(ArrayHelper::getValue($this, "oldAttributes.$attribute") != $this->$attribute);
 	}
 
+	/**
+	 * Подставляет к переданному имени/именам полей имя таблицы
+	 * @param string|string[] $fieldName
+	 * @return string|string[]
+	 */
+	public static function fieldName(string|array $fieldName):string|array {
+		if ((is_string($fieldName))) {
+			return static::tableName().".{$fieldName}";
+		}
+
+		array_walk($fieldName, function(string &$value) {
+			$value = static::tableName().".{$value}";
+		});
+		return $fieldName;
+
+	}
+
 }
