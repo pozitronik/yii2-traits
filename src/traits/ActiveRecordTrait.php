@@ -351,7 +351,7 @@ trait ActiveRecordTrait {
 			return static::tableName().".{$fieldName}";
 		}
 
-		array_walk($fieldName, function(string &$value) {
+		array_walk($fieldName, static function(string &$value) {
 			$value = static::tableName().".{$value}";
 		});
 		return $fieldName;
