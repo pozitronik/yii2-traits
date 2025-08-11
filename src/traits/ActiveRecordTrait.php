@@ -333,6 +333,7 @@ trait ActiveRecordTrait {
 	 * @inheritDoc
 	 * @param ActiveRecordInterface|int|string $model the model to be linked with the current one.
 	 * @noinspection ParameterDefaultValueIsNotNullInspection - для совместимости с методом фреймворка
+	 * @noinspection MissingParameterTypeDeclarationInspection - для совместимости с методом фреймворка
 	 */
 	public function link($name, $model, $extraColumns = []):void {
 		parent::link($name, self::ensureModel($this->$name, $model), $extraColumns);

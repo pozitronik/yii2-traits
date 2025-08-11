@@ -53,6 +53,7 @@ trait ActiveQueryTrait {
 
 	/**
 	 * inheritDoc
+	 * @noinspection MissingParameterTypeDeclarationInspection - для совместимости с методом фреймворка
 	 */
 	public function isEmpty($value):bool {
 		return '' === $value || $value === [] || null === $value || (is_string($value) && '' === trim($value));
