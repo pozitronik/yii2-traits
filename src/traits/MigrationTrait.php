@@ -28,7 +28,7 @@ trait MigrationTrait {
 	 * @return ColumnSchemaBuilder the column instance which can be further customized.
 	 * @throws NotSupportedException
 	 */
-	public function timestamptz(int $precision = null):ColumnSchemaBuilder {
+	public function timestamptz(?int $precision = null):ColumnSchemaBuilder {
 		/** @var Migration $this */
 		return $this->getDb()->getSchema()->createColumnSchemaBuilder('timestamptz', $precision);
 	}

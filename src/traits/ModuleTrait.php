@@ -104,7 +104,7 @@ trait ModuleTrait {
 	 * @throws InvalidConfigException
 	 * @throws Throwable
 	 */
-	public static function a(string $text, array|string $url = null, array $options = []):string {
+	public static function a(string $text, array|string|null $url = null, array $options = []):string {
 		$url = static::to($url);
 		return Html::a($text, $url, $options);
 	}
