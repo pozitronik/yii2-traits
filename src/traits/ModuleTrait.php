@@ -117,7 +117,7 @@ trait ModuleTrait {
 	 * @throws InvalidConfigException
 	 * @throws Throwable
 	 */
-	public static function param(string $parameterName, mixed $defaultValue = null) {
+	public static function param(string $parameterName, mixed $defaultValue = null):mixed {
 		return ArrayHelper::getValue(ModuleHelper::params(static::class), $parameterName, $defaultValue);
 	}
 

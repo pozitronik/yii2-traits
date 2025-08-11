@@ -74,7 +74,7 @@ trait ActiveRecordTrait {
 	 * @return mixed
 	 * @throws InvalidConfigException
 	 */
-	public static function findModelAttribute(mixed $condition, ?string $attribute = null, mixed $default = null) {
+	public static function findModelAttribute(mixed $condition, ?string $attribute = null, mixed $default = null):mixed {
 		if (null === $model = static::findOne($condition)) {
 			return $default;
 		}
