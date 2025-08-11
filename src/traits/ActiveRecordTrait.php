@@ -57,7 +57,9 @@ trait ActiveRecordTrait {
 	 * @example if (null !== $user = Users::findModel($id)) return $user
 	 */
 	public static function findModel(mixed $id, ?Throwable $throw = null):?static {
-		if (null !== ($model = static::findOne($id))) return $model;
+		if (null !== ($model = static::findOne($id))) {
+			return $model;
+		}
 		if (null !== $throw) {
 			throw $throw;
 		}
@@ -73,11 +75,15 @@ trait ActiveRecordTrait {
 	 * @throws InvalidConfigException
 	 */
 	public static function findModelAttribute(mixed $condition, ?string $attribute = null, mixed $default = null) {
-		if (null === $model = static::findOne($condition)) return $default;
+		if (null === $model = static::findOne($condition)) {
+			return $default;
+		}
 
 		if (null === $attribute) {
 			$primaryKeys = static::primaryKey();
-			if (!isset($primaryKeys[0])) throw new InvalidConfigException('"'.static::class.'" must have a primary key.');
+			if (!isset($primaryKeys[0])) {
+				throw new InvalidConfigException('"'.static::class.'" must have a primary key.');
+			}
 
 			$attribute = $primaryKeys[0];
 		}
@@ -110,10 +116,14 @@ trait ActiveRecordTrait {
 	 * @throws Throwable
 	 */
 	public static function findModels(?array $keys):array {
-		if (null === $keys) return [];
+		if (null === $keys) {
+			return [];
+		}
 		$result = [];
 		foreach ($keys as $key) {
-			if (null !== $model = static::findModel($key)) $result[] = $model;
+			if (null !== $model = static::findModel($key)) {
+				$result[] = $model;
+			}
 		}
 		return $result;
 	}
@@ -128,7 +138,9 @@ trait ActiveRecordTrait {
 		if (null === $model = static::find()->where($attributes)->one()) {
 			$model = new static();
 			$model->load($attributes, '');
-			if ($saveNew) $model->save();
+			if ($saveNew) {
+				$model->save();
+			}
 		}
 		return $model;
 	}
@@ -156,7 +168,9 @@ trait ActiveRecordTrait {
 	 * @throws InvalidConfigException
 	 */
 	public static function addInstance(array $searchCondition, ?array $fields = null, bool $ignoreEmptyCondition = true, bool $forceUpdate = false, bool $throwOnError = true):?static {
-		if ($ignoreEmptyCondition && (empty($searchCondition) || (empty(reset($searchCondition))))) return null;
+		if ($ignoreEmptyCondition && (empty($searchCondition) || (empty(reset($searchCondition))))) {
+			return null;
+		}
 
 		$instance = static::getInstance($searchCondition);
 		if ($instance->isNewRecord || $forceUpdate) {
@@ -178,7 +192,9 @@ trait ActiveRecordTrait {
 		$newAttributes = [];
 		$currentAttributes = $this->attributes;
 		foreach ($changedAttributes as $item => $value) {
-			if ($currentAttributes[$item] !== $value) $newAttributes[$item] = $currentAttributes[$item];
+			if ($currentAttributes[$item] !== $value) {
+				$newAttributes[$item] = $currentAttributes[$item];
+			}
 		}
 		return $newAttributes;
 	}
@@ -193,7 +209,9 @@ trait ActiveRecordTrait {
 		$updatedAttributes = [];
 		$currentAttributes = $this->attributes;
 		foreach ($changedAttributes as $item => $value) {
-			if ($currentAttributes[$item] !== $value) $updatedAttributes[$item] = $value;
+			if ($currentAttributes[$item] !== $value) {
+				$updatedAttributes[$item] = $value;
+			}
 		}
 		return $updatedAttributes;
 	}
@@ -261,7 +279,9 @@ trait ActiveRecordTrait {
 	 * @return string
 	 */
 	public function asJSON(string $property):string {
-		if (!$this->hasAttribute($property)) throw new RuntimeException("Field $property not exists in the table ".$this::tableName());
+		if (!$this->hasAttribute($property)) {
+			throw new RuntimeException("Field $property not exists in the table ".$this::tableName());
+		}
 		return json_encode($this->$property, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
 	}
 
@@ -293,7 +313,9 @@ trait ActiveRecordTrait {
 		$deletedModels = $self_class::findAll($condition);
 		$dc = 0;
 		/** @var Transaction $transaction */
-		if ($transactional && null === $transaction = static::getDb()->beginTransaction()) throw new DbException('Starting transaction error');
+		if ($transactional && null === $transaction = static::getDb()->beginTransaction()) {
+			throw new DbException('Starting transaction error');
+		}
 		foreach ($deletedModels as $deletedModel) {
 			if (false === $deletedCount = $deletedModel->delete()) {
 				$transaction->rollBack();
@@ -301,7 +323,9 @@ trait ActiveRecordTrait {
 			}
 			$dc += $deletedCount;
 		}
-		if ($transactional) $transaction->commit();
+		if ($transactional) {
+			$transaction->commit();
+		}
 		return $dc;
 	}
 
@@ -325,7 +349,9 @@ trait ActiveRecordTrait {
 		foreach ($this->attributes as $name => $value) {
 			/** @noinspection TypeUnsafeComparisonInspection */
 			$changed = $strict?(ArrayHelper::getValue($this, "oldAttributes.$name") !== $value):(ArrayHelper::getValue($this, "oldAttributes.$name") != $value);
-			if ($changed) $changedAttributes[$name] = $value;//Нельзя использовать строгое сравнение из-за преобразований БД
+			if ($changed) {
+				$changedAttributes[$name] = $value;
+			}//Нельзя использовать строгое сравнение из-за преобразований БД
 		}
 		return $changedAttributes;
 	}

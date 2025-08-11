@@ -34,7 +34,9 @@ class ActiveQuery extends YiiActiveQuery {
 				$beginDate = $date;
 				$endDate = $beginDate;
 			} else {
-				if (2 !== count($dates = explode($datesDelimiter, $date))) return $this;//разделитель не найден
+				if (2 !== count($dates = explode($datesDelimiter, $date))) {
+					return $this;
+				}//разделитель не найден
 				$beginDate = ArrayHelper::getValue($dates, 0);
 				$endDate = ArrayHelper::getValue($dates, 1);
 			}

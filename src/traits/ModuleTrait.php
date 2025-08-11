@@ -87,7 +87,9 @@ trait ModuleTrait {
 		if (is_array($route)) {/* ['controller{/action}', 'actionParam' => $paramValue */
 			ArrayHelper::setValue($route, 0, Utils::setAbsoluteUrl($module->id.Utils::setAbsoluteUrl(ArrayHelper::getValue($route, 0))));
 		} else {/* 'controller{/action}' */
-			if ('' === $route) $route = $module->defaultRoute;
+			if ('' === $route) {
+				$route = $module->defaultRoute;
+			}
 			$route = Utils::setAbsoluteUrl($module->id.Utils::setAbsoluteUrl($route));
 		}
 		return Url::to($route);

@@ -44,7 +44,9 @@ trait ActiveQueryTrait {
 		if ([] !== $condition = $this->filterCondition($condition)) {
 			$this->joinWith($relation, $eagerLoading, $joinType);
 			$this->andWhere($condition);
-			if ($distinct) $this->distinct();
+			if ($distinct) {
+				$this->distinct();
+			}
 		}
 		return $this;
 	}
