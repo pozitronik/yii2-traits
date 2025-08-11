@@ -20,6 +20,7 @@ trait ActiveQueryTrait {
 	 * @param bool $deleted
 	 * @return $this
 	 * @example ActiveRecord::find()->active()->all()
+	 * @noinspection PhpDocSignatureInspection - it depends on calling class, so $this is correct type
 	 */
 	public function active(bool $deleted = false):self {
 		/** @var ActiveRecord $class */

@@ -153,6 +153,8 @@ trait ActiveRecordTrait {
 	 */
 	public static function getInstance(array|string $searchCondition):static {
 		$instance = static::find()->where($searchCondition)->one();
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		/** @noinspection ProperNullCoalescingOperatorUsageInspection - both could be issues, but require handling */
 		return $instance??new static();
 	}
 

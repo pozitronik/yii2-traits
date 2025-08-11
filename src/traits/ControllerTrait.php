@@ -70,6 +70,7 @@ trait ControllerTrait {
 	 * @throws UnknownClassException|Throwable
 	 */
 	public static function GetControllerActions(bool $asRequestName = true):array {
+		/** @noinspection PhpParamsInspection - it could be an issue, but require testing*/
 		return ControllerHelper::GetControllerActions(static::class, $asRequestName);
 	}
 
