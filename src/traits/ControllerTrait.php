@@ -6,6 +6,7 @@ namespace pozitronik\traits\traits;
 use pozitronik\helpers\ControllerHelper;
 use pozitronik\helpers\Utils;
 use ReflectionException;
+use Throwable;
 use yii\base\UnknownClassException;
 use yii\helpers\Url;
 use yii\web\Controller;
@@ -66,7 +67,7 @@ trait ControllerTrait {
 	 * @param bool $asRequestName Привести имя экшена к виду в запросе
 	 * @return string[]
 	 * @throws ReflectionException
-	 * @throws UnknownClassException
+	 * @throws UnknownClassException|Throwable
 	 */
 	public static function GetControllerActions(bool $asRequestName = true):array {
 		return ControllerHelper::GetControllerActions(static::class, $asRequestName);

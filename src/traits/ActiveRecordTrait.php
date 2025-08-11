@@ -235,6 +235,7 @@ trait ActiveRecordTrait {
 
 	/**
 	 * Универсальная функция удаления любой модели
+	 * @throws DbException|Throwable
 	 */
 	public function safeDelete():void {
 		if ($this->hasAttribute('deleted')) {
