@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace pozitronik\traits\traits;
 
+use JsonException;
 use pozitronik\helpers\ArrayHelper;
 use pozitronik\traits\models\ActiveQuery;
 use RuntimeException;
@@ -277,12 +278,13 @@ trait ActiveRecordTrait {
 	/**
 	 * @param string $property
 	 * @return string
+	 * @throws JsonException
 	 */
 	public function asJSON(string $property):string {
 		if (!$this->hasAttribute($property)) {
 			throw new RuntimeException("Field $property not exists in the table ".$this::tableName());
 		}
-		return json_encode($this->$property, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
+		return json_encode($this->$property, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
 	}
 
 	/**
