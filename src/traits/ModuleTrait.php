@@ -22,8 +22,8 @@ use yii\helpers\Url;
  * @see Module::getInstance()
  */
 trait ModuleTrait {
-	protected $_namespace;
-	protected $_alias;
+	protected ?string $_namespace = null;
+	protected ?string $_alias = null;
 
 	/**
 	 * Возвращает неймспейс загруженного модуля (для вычисления алиасных путей внутри модуля)
