@@ -204,12 +204,10 @@ trait ActiveRecordTrait {
 	 * @throws Throwable
 	 */
 	public function identifyChangedAttributes():array {
-		$changedAttributes = [];
-		foreach ($this->attributes as $name => $value) {
-			/** @noinspection TypeUnsafeComparisonInspection */
-			if (ArrayHelper::getValue($this, "oldAttributes.$name") != $value) $changedAttributes[$name] = $value;//Нельзя использовать строгое сравнение из-за преобразований БД
-		}
-		return $changedAttributes;
+		return array_filter($this->attributes, function($value, $name) {
+			/** @noinspection TypeUnsafeComparisonInspection *///Нельзя использовать строгое сравнение из-за преобразований БД
+			return ArrayHelper::getValue($this, "oldAttributes.$name") != $value;
+		}, ARRAY_FILTER_USE_BOTH);
 	}
 
 	/**
