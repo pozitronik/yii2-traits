@@ -215,6 +215,7 @@ trait ActiveRecordTrait {
 	 * Отличается от updateAttribute тем, что триггерит onAfterSave
 	 * @param string $name
 	 * @param mixed $value
+	 * @throws DbException
 	 */
 	public function setAndSaveAttribute(string $name, mixed $value):void {
 		$this->setAttribute($name, $value);
@@ -225,6 +226,7 @@ trait ActiveRecordTrait {
 	 * Работает аналогично saveAttributes, но сразу сохраняет данные.
 	 * Отличается от updateAttributes тем, что триггерит onAfterSave
 	 * @param null|array $values
+	 * @throws DbException
 	 */
 	public function setAndSaveAttributes(?array $values):void {
 		$this->setAttributes($values, false);
