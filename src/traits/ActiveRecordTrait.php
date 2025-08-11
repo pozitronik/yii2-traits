@@ -42,7 +42,7 @@ trait ActiveRecordTrait {
 			/** @var ActiveRecordInterface $className */
 			$model = $className::findOne($model);
 		}
-		return is_a($model, ActiveRecordInterface::class, false)?$model:null;
+		return is_a($model, ActiveRecordInterface::class)?$model:null;
 	}
 
 	/**
