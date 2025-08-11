@@ -176,7 +176,7 @@ trait ActiveRecordTrait {
 		$instance = static::getInstance($searchCondition);
 		if ($instance->isNewRecord || $forceUpdate) {
 			$instance->loadArray($fields??$searchCondition);
-			if (!$instance->save() && $throwOnError) {
+			if ($throwOnError && !$instance->save()) {
 				throw new Exception("{$instance->formName()} errors: ".VarDumper::dumpAsString($instance->errors));
 			}
 		}
